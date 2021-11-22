@@ -1,0 +1,20 @@
+html, body {
+  width: 100px;
+}
+
+body {
+  background-color: blue;
+}
+
+.hidden {
+  display: none;
+}
+
+.reset {
+  background-color: #FBFBC9;
+}
+
+.reset:hover {
+  background-color: #EAEA9D;
+}
+
