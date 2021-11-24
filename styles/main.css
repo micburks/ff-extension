@@ -1,0 +1,63 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+body {
+  background-color: #cdcdcd;
+}
+
+.hidden {
+  display: none;
+}
+
+button {
+  background-color: none;
+  border: 2px solid #8d8d8d;
+  border-radius: 2px;
+  margin: 2px;
+  padding: 3px 2px;
+}
+
+#popup-content {
+  display: inline-block;
+  padding: 5px;
+  width: 100%;
+}
+
+ul {
+  display: inline-block;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+li {
+  padding: 2px;
+}
+
+h3 {
+  margin: 5px;
+}
+
+label {
+  display: block;
+  margin: 5px 0;
+}
+
+input {
+  padding: 2px 4px;
+}
+
+.container {
+  display: inline-block;
+  padding: 10px 25%;
+  width: 100%;
+}

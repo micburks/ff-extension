@@ -1,35 +1,45 @@
-function listenForEvents() {
-}
+let blocks = [];
 
-function reportExecuteScriptError(error) {
-  document.querySelector("#popup-content").classList.add("hidden");
-  document.querySelector("#error-content").classList.remove("hidden");
-  console.error(`Failed to execute brooser content script: ${error.message}`);
-}
+browser.storage.local.get(data => {
+  blocks = data.brooser || [];
+  setBlocks();
+});
 
-(async function () {
-  async function setBlocks() {
-    const blocks = (await browser.storage.local.get('brooser')).brooser || [];
-    document.getElementById('blocks').innerHTML = blocks.map(b => `<li>${b}</li>`);
+browser.storage.onChanged.addListener(changed => {
+  blocks = changed.brooser.newValue;
+  setBlocks();
+});
+
+document.getElementById('block-this').addEventListener('click', async e => {
+  const [tab] = await browser.tabs.query({active: true, currentWindow: true});
+  const {hostname, protocol} = new URL(tab.url);
+  if (protocol === 'moz-extension:') {
+    return;
   }
-  await setBlocks();
+  if (blocks.some(([block]) => block === hostname)) {
+    return;
+  }
+  blocks.push([hostname, now()]);
+  await browser.storage.local.set({brooser: blocks});
+  await browser.tabs.reload(tab.id);
+});
 
-  document.getElementById('edit').addEventListener('click', e => {
-    browser.tabs.executeScript({file: "/content-scripts/edit.js"})
-      .then(listenForEvents)
-      .catch(reportExecuteScriptError);
-  });
+function now() {
+  const d = new Date();
+  return +d;
+}
 
-  document.getElementById('block-this').addEventListener('click', async e => {
-    const blocks = (await browser.storage.local.get('brooser')).brooser || [];
-    const tab = (await browser.tabs.query({active: true, currentWindow: true}))[0];
-    const origin = (new URL(tab.url)).origin;
-    const newBlocks = Array.from(
-      new Set(
-        blocks.concat(origin.replace(/^https?:\/\//, ''))
-      )
-    );
-    await browser.storage.local.set({brooser: newBlocks});
-    await browser.tabs.reload(tab.id);
+document.getElementById('edit').addEventListener('click', async e => {
+  const [tab] = await browser.tabs.query({active: true, currentWindow: true});
+  const blockedUrl = browser.runtime.getURL('pages/blocked.html');
+  if (tab.url.startsWith(blockedUrl)) {
+    return;
+  }
+  browser.tabs.update(tab.id, {
+    url: `${browser.runtime.getURL('pages/edit.html')}?${encodeURIComponent(tab.url)}`,
   });
-})();
+});
+
+function setBlocks() {
+  document.getElementById('blocks').innerHTML = blocks.sort().map(([block]) => `<li>${block}</li>`).join('');
+}
